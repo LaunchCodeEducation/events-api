@@ -1,11 +1,14 @@
 package org.launchcode.Spring.REST.API.Controllers;
 
+import jakarta.servlet.http.HttpServletRequest;
 import org.launchcode.Spring.REST.API.Models.Event;
 import org.launchcode.Spring.REST.API.Models.EventDto;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.List;
 
 @RestController
@@ -20,10 +23,15 @@ public class EventController {
     public Event getEventById(@PathVariable int id) {
         return Event.findItem(id);
     }
+
     @PostMapping
-    public Event postEvent(@RequestBody EventDto eventDto) {
-        return Event.createEvent(eventDto.getName(), eventDto.getDescription());
+    public ResponseEntity<Event> postEvent(HttpServletRequest servletRequest, @RequestBody EventDto eventDto) throws URISyntaxException {
+        Event event = Event.createEvent(eventDto.getName(), eventDto.getDescription());
+        URI location = new URI(servletRequest.getRequestURL().toString() + "/" + event.getId());
+
+        return ResponseEntity.created(location).body(event);
     }
+
     @PatchMapping(value = "/{id}")
     public Event patchEvent(@PathVariable int id, @RequestBody EventDto eventDto) {
         Event theEvent = Event.findItem(id);
